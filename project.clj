@@ -69,8 +69,8 @@
         :figwheel     true ;{:on-jsload "epimaxsa.match424.web-mobile.dev.core/run"}
         :source-paths ["src/cljs" "src/cljc"
                        "dev/cljs" "dev/cljc"]
-        :compiler     {:output-to            "resources-index/js/compiled/rente.js"
-                       :output-dir           "resources-index/js/compiled/out"
+        :compiler     {:output-to            "resources-index/dev/js/compiled/rente.js"
+                       :output-dir           "resources-index/dev/js/compiled/out"
                        :optimizations        :none
                        :main                 rente.start
                        :asset-path           "js/compiled/out"
