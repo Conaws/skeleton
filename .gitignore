@@ -8,8 +8,6 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
-/resources/public/js/*.js
-/dev-resources
 profiles.clj
 figwheel_server.log
 /dev-resources/public/js/compiled/

@@ -79,13 +79,13 @@
                        :cache-analysis       true}}
        #_{:id           "min"
         :source-paths ["src/cljs" "src/cljc"]
-        :compiler     {:output-to     "resources-index/prod/js/compiled/out/rente.js"
+        :compiler     {:output-to     "dev-resources/public/js/compiled/rente.js"
                        :main          rente.start
                        :optimizations :advanced
                        :pretty-print  false}}]}
-  :figwheel {:http-server-root "resources/public"
+  :figwheel {:http-server-root "dev-resources/public"
              :port             3448
-             :css-dirs         ["resources/public/css"]}
+             :css-dirs         ["dev-resources/public/css"]}
   :aliases {"package"
             ["with-profile" "prod" "do"
              "clean" ["cljsbuild" "once"]]})
