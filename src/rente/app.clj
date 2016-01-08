@@ -4,12 +4,12 @@
             [rente.ws :as ws]))
 
 (defrecord App [ws-connection]
-  component/Lifecycle
-  (start [component]
-    (log/debug "Application logic started")
-    component)
-  (stop [component]
-    (log/debug "Application logic stopped")
+  component/Lifec ycle
+  (st art [component]
+    (log/debug "Application logi c started")
+    compon ent)
+  (stop  [component]
+    (log/debug "Application logi c stopped")
     component))
 
 (defn new-app []
