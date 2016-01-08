@@ -44,7 +44,7 @@
   :plugins [[lein-cljsbuild "1.1.1"]]
 
   :source-paths ["src/cljc" "src/clj"]
-  :resource-paths ["resources" "resources-index/prod"]
+  :resource-paths ["resources"]
   :target-path "target/%s"
 
   :main ^:skip-aot rente.run
@@ -55,9 +55,9 @@
                    :plugins [[lein-figwheel "0.5.0-2"]
                              [lein-environ "1.0.1"]]
 
-                   :source-paths ["dev"]
+                   :source-paths ["src/cljc" "src/clj"]
                    :resource-paths ^:replace
-                     ["resources" "dev-resources" "resources-index/dev"]}
+                     ["resources" "dev-resources"]}
              :prod {:cljsbuild
                     {:builds
                      {:client {:compiler
@@ -66,11 +66,11 @@
   :cljsbuild
     {:builds
       [{:id           "dev"
-        :figwheel     true ;{:on-jsload "epimaxsa.match424.web-mobile.dev.core/run"}
+        :figwheel     true
         :source-paths ["src/cljs" "src/cljc"
                        "dev/cljs" "dev/cljc"]
-        :compiler     {:output-to            "resources-index/dev/js/compiled/rente.js"
-                       :output-dir           "resources-index/dev/js/compiled/out"
+        :compiler     {:output-to            "dev-resources/public/js/compiled/rente.js"
+                       :output-dir           "dev-resources/public/js/compiled/out"
                        :optimizations        :none
                        :main                 rente.start
                        :asset-path           "js/compiled/out"
@@ -79,14 +79,13 @@
                        :cache-analysis       true}}
        #_{:id           "min"
         :source-paths ["src/cljs" "src/cljc"]
-        :compiler     {:output-to     "resources-index/js/compiled/out/rente.js"
+        :compiler     {:output-to     "resources-index/prod/js/compiled/out/rente.js"
                        :main          rente.start
                        :optimizations :advanced
                        :pretty-print  false}}]}
-  :figwheel {:http-server-root "public"
+  :figwheel {:http-server-root "resources/public"
              :port             3448
              :css-dirs         ["resources/public/css"]}
-
   :aliases {"package"
             ["with-profile" "prod" "do"
              "clean" ["cljsbuild" "once"]]})
