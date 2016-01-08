@@ -43,49 +43,49 @@
 
   :plugins [[lein-cljsbuild "1.1.1"]]
 
-  :source-paths ["src"]
+  :source-paths ["src/cljc" "src/clj"]
   :resource-paths ["resources" "resources-index/prod"]
   :target-path "target/%s"
 
   :main ^:skip-aot rente.run
 
-  :cljsbuild
-  {:builds
-   {:client {:source-paths ["src/rente/client"]
-             :compiler
-             {:output-to "resources/public/js/app.js"
-              :output-dir "dev-resources/public/js/out"}}}}
+  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.10"]
+                                  [figwheel "0.5.0-2"]]
 
-  :profiles {:dev-config {}
+                   :plugins [[lein-figwheel "0.5.0-2"]
+                             [lein-environ "1.0.1"]]
 
-             :dev [:dev-config
-                   {:dependencies [[org.clojure/tools.namespace "0.2.10"]
-                                   [figwheel "0.5.0-2"]]
-
-                    :plugins [[lein-figwheel "0.5.0-2"]
-                              [lein-environ "1.0.1"]]
-
-                    :source-paths ["dev"]
-                    :resource-paths ^:replace
-                    ["resources" "dev-resources" "resources-index/dev"]
-
-                    :cljsbuild
-                    {:builds
-                     {:client {:source-paths ["dev"]
-                               :compiler
-                               {:optimizations :none
-                                :source-map true}}}}
-
-                    :figwheel {:http-server-root "public"
-                               :port 3449
-                               :repl false
-                               :css-dirs ["resources/public/css"]}}]
-
+                   :source-paths ["dev"]
+                   :resource-paths ^:replace
+                     ["resources" "dev-resources" "resources-index/dev"]}
              :prod {:cljsbuild
                     {:builds
                      {:client {:compiler
                                {:optimizations :advanced
                                 :pretty-print false}}}}}}
+  :cljsbuild
+    {:builds
+      [{:id           "dev"
+        :figwheel     true ;{:on-jsload "epimaxsa.match424.web-mobile.dev.core/run"}
+        :source-paths ["src/cljs" "src/cljc"
+                       "dev/cljs" "dev/cljc"]
+        :compiler     {:output-to            "resources-index/js/compiled/rente.js"
+                       :output-dir           "resources-index/js/compiled/out"
+                       :optimizations        :none
+                       :main                 rente.start
+                       :asset-path           "js/compiled/out"
+                       :source-map           true
+                       :source-map-timestamp true
+                       :cache-analysis       true}}
+       #_{:id           "min"
+        :source-paths ["src/cljs" "src/cljc"]
+        :compiler     {:output-to     "resources-index/js/compiled/out/rente.js"
+                       :main          rente.start
+                       :optimizations :advanced
+                       :pretty-print  false}}]}
+  :figwheel {:http-server-root "public"
+             :port             3448
+             :css-dirs         ["resources/public/css"]}
 
   :aliases {"package"
             ["with-profile" "prod" "do"

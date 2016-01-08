@@ -1,10 +1,10 @@
 (ns rente.ws
-  (:require [clojure.tools.logging :as log]
-            [com.stuartsierra.component :as component]
-            [clojure.core.async :as async]
-            [taoensso.sente.server-adapters.http-kit :as sente-http]
-            [taoensso.sente :as sente]
-            [taoensso.sente.packers.transit :as sente-transit]))
+  (:require [clojure.tools.logging                   :as log          ]
+            [com.stuartsierra.component              :as component    ]
+            [clojure.core.async                      :as async        ]
+            [taoensso.sente.server-adapters.http-kit :as sente-http   ]
+            [taoensso.sente                          :as sente        ]
+            [taoensso.sente.packers.transit          :as sente-transit]))
 
 (def ping-counts (atom 0))
 
@@ -37,29 +37,27 @@
 
 (defrecord WSConnection [ch-recv connected-uids send-fn ring-handlers]
   component/Lifecycle
-  (start [component]
+  (start [this]
     (if (and ch-recv connected-uids send-fn ring-handlers)
-      component
-      (let [component (component/stop component)
-
-            packer (sente-transit/get-flexi-packer :edn)
-
-            {:keys [ch-recv send-fn connected-uids
-                    ajax-post-fn ajax-get-or-ws-handshake-fn]}
-            (sente/make-channel-socket! sente-http/http-kit-adapter {:packer packer})]
-        (log/debug "WebSocket connection started")
-        (assoc component
-          :ch-recv ch-recv
-          :connected-uids connected-uids
-          :send-fn send-fn
-          :stop-the-thing (sente/start-chsk-router! ch-recv event-msg-handler*)
-          :ring-handlers
-          (->WSRingHandlers ajax-post-fn ajax-get-or-ws-handshake-fn)))))
-  (stop [component]
+        this
+        (let [component (component/stop this)
+              packer    (sente-transit/get-flexi-packer :edn)
+  
+              {:keys [ch-recv send-fn connected-uids
+                      ajax-post-fn ajax-get-or-ws-handshake-fn]}
+              (sente/make-channel-socket! sente-http/http-kit-adapter {:packer packer})]
+          (log/debug "WebSocket connection started")
+          (assoc this
+            :ch-recv        ch-recv
+            :connected-uids connected-uids
+            :send-fn        send-fn
+            :stop-the-thing (sente/start-chsk-router! ch-recv event-msg-handler*)
+            :ring-handlers  (->WSRingHandlers ajax-post-fn ajax-get-or-ws-handshake-fn)))))
+  (stop [this]
     (when ch-recv (async/close! ch-recv))
     (log/debug "WebSocket connection stopped")
-    (:stop-the-thing component)
-    (assoc component
+    (:stop-the-thing this)
+    (assoc this
       :ch-recv nil :connected-uids nil :send-fn nil :ring-handlers nil)))
 
 
