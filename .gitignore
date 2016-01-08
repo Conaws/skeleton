@@ -12,3 +12,4 @@ pom.xml.asc
 /dev-resources
 profiles.clj
 figwheel_server.log
+/resources-index/js/compiled/
