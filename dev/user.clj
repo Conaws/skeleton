@@ -13,8 +13,6 @@
    [rente.config :as config]
    [rente.system :as system]))
 
-"Boooooommmmmm"
-
 (def system nil)
 
 (defn init []

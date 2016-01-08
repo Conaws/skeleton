@@ -6,19 +6,14 @@
             [rente.system 		   	    :as sys :refer [system]]
             [rente.utils.resources      :as res]))
 
-#_(defn -main [& args]
-  (let [config (config/get-config)]
-    (component/start (system config))
-    (log/info "rente started")))
-
 (defn ^:export -main []
   @sys/create-system
-  (res/reload! (:rente.system/system @res/systems))
+  ;(res/reload! (:rente.system/system @res/systems))
   
-  (reset! db/conn* (-> @sys-map :db/db :ephemeral :conn))
-  (initialize-db!)
-  (posh.core/posh! @db/conn*)
-  (todo/init!)
+  ;#?(:clj  (reset! db/conn* (-> @sys/sys-map :db/db :backend   :conn))
+  ;   :cljs (reset! db/conn* (-> @sys/sys-map :db/db :ephemeral :conn)))
+  (sys/initialize-db!)
+  ;(posh.core/posh! @db/conn*)
 
-  (rx/render [todo/todo-app]
+  #_(rx/render [todo/todo-app]
     (js/document.getElementById "app")))

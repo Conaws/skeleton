@@ -16,8 +16,8 @@
   component/Lifecycle
     (start [this]
       (log/pr :user "Starting Ephemeral database")
-      ; Maintain DB history.
-      (let [history (when (pos? history-limit) (atom []))
+      (let [; Maintain DB history.
+            history (when (pos? history-limit) (atom []))
             _ (when (pos? history-limit)
                 (mdb/listen! conn :history
                   (fn [tx-report] (swap! history c/conj tx-report))))
@@ -31,7 +31,19 @@
       (reset! conn nil) ; TODO is this wise?
       this))
 
-(defrecord ^{:doc "Datomic"}
+(defrecord ^{:doc "Can be one of three things:
+                   1) A direct connection to a Datomic database using the Datomic Peer API
+                      - This option is for Clojure (e.g. server) only, not ClojureScript
+                   2) A direct connection to a Datomic database using the Datomic HTTP API
+                      - This option is currently not proven to be secure and is awaiting
+                        further developments by the Cognitect team.
+                   3) A REST endpoint pair:
+                      - One for pushing, e.g. 'POST /db'
+                      - One for pulling, e.g. 'GET  /db'
+                      - This way the Datomic database is not directly exposed to the client,
+                        but rather the server is able to use access control and other
+                        security measures when handling queries from the client.
+                        This is the (currently) recommended option."}
   BackendDatabase [type name host port rest-port uri conn txr-alias create-if-not-present?]
   component/Lifecycle
     (start [this]
@@ -73,3 +85,76 @@
       #?(:clj (db/release @conn))
       (reset! conn nil)
       this))
+
+(defrecord
+  ^{:doc "Database-system consisting of an EphemeralDatabase (e.g. DataScript),
+          BackendDatabase (e.g. Datomic), and a reconciler which constantly
+          pushes diffs from the EphemeralDatabase to the BackendDatabase
+          and pulls new data from the BackendDatabase.
+
+          A Datomic subscription model would be really nice for performance
+          (ostensibly) to avoid the constant backend polling of the reconciler,
+          but unfortunately Datomic does not have this.
+
+          @backend: 
+            See BackendDatabase
+            
+          @reconciler
+            Doesn't currently exist
+
+          "}
+  Database
+  [ephemeral reconciler backend]
+  ; TODO code pattern here
+  component/Lifecycle
+    (start [this]
+      (let [ephemeral-f  (when ephemeral  (component/start ephemeral ))
+            backend-f    (when backend    (component/start backend   ))
+            reconciler-f (when reconciler (component/start reconciler))]
+        (c/assoc this
+          :ephemeral  ephemeral-f
+          :reconciler reconciler-f
+          :backend    backend-f)))
+    (stop [this]
+      (let [reconciler-f (when reconciler (component/stop reconciler))
+            ephemeral-f  (when ephemeral  (component/stop ephemeral ))
+            backend-f    (when backend    (component/stop backend   ))]
+        (c/assoc this
+          :ephemeral  ephemeral-f
+          :reconciler reconciler-f
+          :backend    backend-f))))
+
+(defn ->db
+  "Constructor for |Database|."
+  {:usage '(->db {:backend {}
+                  :reconciler {}
+                  :ephemeral {}})}
+  [{{:keys [type name host port rest-port txr-alias create-if-not-present?] :as backend}
+    :backend
+    {:keys [] :as reconciler}
+    :reconciler
+    {:keys [history-limit] :as ephemeral}
+    :ephemeral
+    :as config}]
+  (log/pr :user (kmap config))
+  (when backend
+    (err/assert (contains? #{:free :http} type)) ; TODO for now
+    (err/assert ((fn-and string? nempty?) name))
+    (err/assert ((fn-and string? nempty?) host))
+    (err/assert (integer? port))
+    (err/assert ((fn-or nil? integer?) port))
+    (err/assert ((fn-or nil? string?)  txr-alias))
+    (err/assert ((fn-or nil? boolean?) create-if-not-present?)))
+
+  (when ephemeral
+    (err/assert ((fn-or nil? integer?) history-limit)))
+
+  (Database.
+    (when ephemeral
+      (map->EphemeralDatabase
+        (c/assoc ephemeral :history-limit (or history-limit 0))))
+    reconciler
+    (when backend
+      (map->BackendDatabase 
+        (c/assoc backend :uri  (atom nil)
+                         :conn (atom nil))))))
