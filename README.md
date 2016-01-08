@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## Usage
 
 Clone, and cd into the `rente` folder.
@@ -85,3 +86,13 @@ Copyright © Enterlab 2014-2015
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
+=======
+# skeleton
+#The One True Skeleton Key 
+##To Awesome technologies including:
++ Reagent
++ Datomic
++ Datascript
++ Sente
++ And other awesome technologies to be discovered
+>>>>>>> d24bd49cf860c0e98a23ec3decca1b0874e4fab2
