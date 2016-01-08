@@ -11,10 +11,10 @@
 
 (defn handler [ajax-post-fn ajax-get-or-ws-handshake-fn]
   (routes
-   (GET  "/"     _   (clojure.java.io/resource "index.html"))
-   (GET  "/chsk" req (ajax-get-or-ws-handshake-fn req))
-   (POST "/chsk" req (ajax-post-fn req))
-   (route/not-found "<h1>Page not found</h1>")))
+    (GET  "/"     _   (clojure.java.io/resource "index.html"))
+    (GET  "/chsk" req (ajax-get-or-ws-handshake-fn req))
+    (POST "/chsk" req (ajax-post-fn req))
+    (route/not-found "<h1>Page not found</h1>")))
 
 (defn app [handler]
   (let [ring-defaults-config
